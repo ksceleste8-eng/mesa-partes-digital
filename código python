@@ -1,0 +1,136 @@
+from datetime import datetime
+
+expedientes = []
+contador = 0
+
+
+def registrar():
+    global contador
+    print("\n--- REGISTRO DE EXPEDIENTE ---")
+    nombre = input("Nombre: ").upper()
+    apellidos = input("Apellidos: ").upper()
+    dni = input("DNI: ")
+    tipo = input("Tipo de trámite: ")
+    asunto = input("Asunto: ")
+    fecha = input("Fecha (AAAA-MM-DD): ")
+    area = input("Área de destino: ")
+
+    # Validaciones
+    if nombre == "" or apellidos == "" or dni == "" or tipo == "" or asunto == "" or fecha == "" or area == "":
+        print("Error: completa todos los campos.")
+        return
+
+    if not dni.isdigit() or len(dni) != 8:
+        print("Error: el DNI debe tener 8 dígitos.")
+        return
+
+    for e in expedientes:
+        if e["dni"] == dni:
+            print("Error: el DNI ya está registrado.")
+            return
+
+    try:
+        datetime.strptime(fecha, "%Y-%m-%d")
+    except ValueError:
+        print("Error: fecha inválida.")
+        return
+
+    # El contador siempre sube, así los códigos no se repiten aunque se elimine alguno
+    contador = contador + 1
+    codigo = "EXP-" + str(contador).zfill(4)
+
+    expediente = {
+        "codigo": codigo,
+        "nombre": nombre,
+        "apellidos": apellidos,
+        "dni": dni,
+        "tipo": tipo,
+        "asunto": asunto,
+        "fecha": fecha,
+        "area": area,
+        "estado": "Registrado"
+    }
+    expedientes.append(expediente)
+
+    print("\n--- EXPEDIENTE REGISTRADO ---")
+    for campo in expediente:
+        print(campo.capitalize() + ": " + expediente[campo])
+
+
+def buscar():
+    if len(expedientes) == 0:
+        print("No hay expedientes registrados.")
+        return
+
+    clave = input("Ingresa código EXP o DNI: ").upper()
+    for e in expedientes:
+        if clave == e["codigo"] or clave == e["dni"]:
+            print("\n--- EXPEDIENTE ENCONTRADO ---")
+            for campo in e:
+                print(campo.capitalize() + ": " + e[campo])
+            return
+    print("Expediente no encontrado.")
+
+
+def obtener_fecha(e):
+    return e["fecha"]
+
+
+def listar():
+    if len(expedientes) == 0:
+        print("No hay expedientes registrados.")
+        return
+
+    ordenados = sorted(expedientes, key=obtener_fecha)
+    for e in ordenados:
+        print("\n--------------------")
+        for campo in e:
+            print(campo.capitalize() + ": " + e[campo])
+
+
+def eliminar():
+    if len(expedientes) == 0:
+        print("No hay expedientes registrados.")
+        return
+
+    print("\n--- ELIMINAR EXPEDIENTE ---")
+    print("Expedientes registrados:")
+    for e in expedientes:
+        print(e["codigo"] + " | DNI: " + e["dni"] + " | " + e["nombre"] + " " + e["apellidos"])
+
+    clave = input("\nIngresa el código EXP o DNI que quieres eliminar: ").upper()
+    for e in expedientes:
+        if clave == e["codigo"] or clave == e["dni"]:
+            confirmar = input("¿Seguro que quieres eliminarlo? (S/N): ").upper()
+            if confirmar == "S":
+                expedientes.remove(e)
+                print("Expediente eliminado correctamente.")
+            else:
+                print("Eliminación cancelada.")
+            return
+    print("Expediente no encontrado.")
+
+
+# Programa principal
+while True:
+    print("\n--- MESA DE PARTES DIGITAL ---")
+    print("1. Registrar")
+    print("2. Buscar")
+    print("3. Listar por fecha")
+    print("4. Eliminar")
+    print("5. Salir")
+    opcion = input("Elige una opción: ")
+
+    if opcion == "1":
+        registrar()
+    elif opcion == "2":
+        buscar()
+    elif opcion == "3":
+        listar()
+    elif opcion == "4":
+        eliminar()
+    elif opcion == "5":
+        print("Sistema finalizado.")
+        break
+    else:
+        print("Opción inválida.")
